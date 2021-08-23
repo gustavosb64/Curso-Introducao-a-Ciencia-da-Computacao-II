@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 typedef struct maze{
-    char **maze;
-    int n_lines;
-    int n_columns;
-    int end_x;
+    char **maze;    //the maze as read from file
+
+    int n_lines;    //amount of lines
+    int n_columns;  //amount of columns
+
+    int n_people;   //amount of people in the maze ('#') 
+    int n_paths;    //amount of paths in the maze ('.')
+
+    int end_x;      //coordinates for the end of the maze
     int end_y;
-    int n_people;
-    int n_paths;
 }Maze;
 
 #define BUFFER 4096
@@ -29,25 +31,6 @@ char *readline(FILE *stream) {
     string = (char *) realloc(string, pos);
 
     return string;
-}
-
-char *read_maze_line(FILE *stream, Maze *sMaze){
-    char *maze_line = (char *) calloc( ((*sMaze).n_columns+1), sizeof(char));
-    char c;
-
-    for(int i=0; i <= (*sMaze).n_columns; i++){
-        c = (char) fgetc(stream);
-        if (c == '#'){
-            (*sMaze).n_people += 1;
-            maze_line[i] = c;
-        }
-        else if (c == '.'){
-            (*sMaze).n_paths += 1;
-            maze_line[i] = c;
-        }
-    }
-
-    return maze_line;
 }
 
 //while end_found == 0, the path is not completed yet. It returns the amount of visited paths
@@ -81,7 +64,48 @@ int walk_maze(Maze sMaze, int pos_x, int pos_y, int *end_found){
     return (n_visited + 1);
 }
 
+//reads the maze as a string from stream and stores it properly in (*sMaze).maze
+void getMaze(FILE *stream, Maze *sMaze){
+
+    (*sMaze).maze = (char **) calloc((*sMaze).n_lines, sizeof(char *));
+    (*sMaze).n_people = 0;
+    (*sMaze).n_paths = 0;
+
+    //allocs memory for each line in (*sMaze).maze
+    char c;
+    for (int i = 0; i < (*sMaze).n_lines; i++){
+
+        //1 extra column is used for storing '\0'
+        (*sMaze).maze[i] = (char *) calloc((*sMaze).n_columns+1, sizeof(char));
+
+        //1 extra char is read for '\n'; it is not stored in (*sMaze).maze though
+        for (int j = 0; j <= (*sMaze).n_columns; j++){
+            c = (char) fgetc(stream);  
+
+            if (c == '#'){
+                (*sMaze).n_people++;
+                (*sMaze).maze[i][j] = c;
+            }
+            else if(c == '.'){
+                (*sMaze).n_paths++;
+                (*sMaze).maze[i][j] = c;
+
+                //if '.' is in maze's border, it is the end, with pos(i,j) being its coordinates
+                if (i == 0 || i == (*sMaze).n_lines-1 || j == 0 || j == (*sMaze).n_columns-1){
+                    (*sMaze).end_x = i;
+                    (*sMaze).end_y = j;
+                }
+            }
+        }
+    }
+
+    return;
+}
+
 void Print(Maze sMaze, int visitados){
+
+    for (int i=0; i < sMaze.n_lines; i++)
+        printf("%s\n",sMaze.maze[i]);
 
     int npessoas = sMaze.n_people;
     int caminhos = sMaze.n_paths;
@@ -109,31 +133,12 @@ int main(int argc, char *argv[]){
     int start_x, start_y;
     fscanf(fMaze, " %d %d", &sMaze.n_lines, &sMaze.n_columns);
     fscanf(fMaze, " %d %d", &start_x, &start_y);
-    getc(fMaze); //reads remanescent '\n' from fMaze
+    getc(fMaze); //reads '\n' from fMaze
 
-    sMaze.maze = (char **) malloc(sMaze.n_lines * sizeof(char *));
-    sMaze.n_people = 0;
-    sMaze.n_paths = 0;
-    for (int i=0; i < sMaze.n_lines; i++){
-
-        sMaze.maze[i] = read_maze_line(fMaze, &sMaze);
-
-        if (sMaze.maze[i][0] == '.'){
-            sMaze.end_x = i;
-            sMaze.end_y = 0;
-        }
-        else if (sMaze.maze[i][sMaze.n_columns-1] == '.'){
-            sMaze.end_x = i;
-            sMaze.end_y = sMaze.n_columns-1;
-        }
-
-    }
+    getMaze(fMaze, &sMaze);
 
     int end_found = 0;
     int n_visited = walk_maze(sMaze, start_x, start_y, &end_found);
-    for (int i=0; i < sMaze.n_lines; i++){
-        printf("%s\n",sMaze.maze[i]);
-    }
 
     Print(sMaze, n_visited);
 
