@@ -5,7 +5,11 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include "lista_encadeada.h"
+
+typedef struct field{
+    int elem;       //número de dicas; -1 caso seja uma bomba
+    int hidden;     //quando 1, manter oculto; quando 0, não (utilizado na opção3) 
+}Field;
 
 /* Função de leitura de linha
  *  Lê da entrada recebida (stream) uma string até encontrar algum terminador de linha (ou de arquivo) e a retorna
@@ -66,10 +70,15 @@ void print_board(){
  *  Retorno:
  *      int **list_field;
 */
-int** get_board_with_hits(FILE *File_board, int *n_columns, int *n_lines){
+Field** get_board_with_hits(int *n_columns, int *n_lines){
 
-    int **list_field = (int **) malloc(1 * sizeof(int *));
-    list_field[0] = (int *) malloc(1 * sizeof(int));
+    char *board_name = readline(stdin);
+    FILE *File_board = fopen(board_name, "r");
+    free(board_name);
+
+    //int **list_field = (int **) malloc(1 * sizeof(int *));
+    Field **list_field = (Field **) malloc(1 * sizeof(Field *));
+    list_field[0] = (Field *) malloc(1 * sizeof(Field));
 
     char c;
     int j=0;
@@ -81,12 +90,14 @@ int** get_board_with_hits(FILE *File_board, int *n_columns, int *n_lines){
         c = (char) fgetc(File_board);
 
         if (c == '.'){
-            list_field[0][j] = 0;
-            list_field[0] = (int *) realloc(list_field[0], (j+2)*sizeof(int));
+            list_field[0][j].elem = 0;
+            list_field[0][j].hidden = 1;
+            list_field[0] = (Field *) realloc(list_field[0], (j+2)*sizeof(Field));
         }
         else if (c == '*'){
-            list_field[0][j] = -1;
-            list_field[0] = (int *) realloc(list_field[0], (j+2)*sizeof(int));
+            list_field[0][j].elem = -1;
+            list_field[0][j].hidden = 1;
+            list_field[0] = (Field *) realloc(list_field[0], (j+2)*sizeof(Field));
         }
 
         j++;
@@ -98,8 +109,8 @@ int** get_board_with_hits(FILE *File_board, int *n_columns, int *n_lines){
     int i = 1;
     do{
 
-        list_field = (int **) realloc(list_field, (i+1)*sizeof(int *)); 
-        list_field[i] = (int *) malloc((*n_columns) * sizeof(int));
+        list_field = (Field **) realloc(list_field, (i+1)*sizeof(Field *)); 
+        list_field[i] = (Field *) malloc((*n_columns) * sizeof(Field));
 
         j = 0;
 
@@ -107,10 +118,14 @@ int** get_board_with_hits(FILE *File_board, int *n_columns, int *n_lines){
 
             c = (char) fgetc(File_board);
 
-            if (c == '.')
-                list_field[i][j] = 0;
-            else if (c == '*')
-                list_field[i][j] = -1;
+            if (c == '.'){
+                list_field[i][j].elem = 0;
+                list_field[i][j].hidden = 1;
+            }
+            else if (c == '*'){
+                list_field[i][j].elem = -1;
+                list_field[i][j].hidden = 1;
+            }
 
             j++;
 
@@ -129,42 +144,44 @@ int** get_board_with_hits(FILE *File_board, int *n_columns, int *n_lines){
 
             /*Quando uma bomba é encontrada, verifica-se sua vizinhança e incrementa o que for necessário
               O campo apenas é incrementado quando for >= 0, isto é, quando não for uma bomba */
-            if (list_field[l][k] == -1){
+            if (list_field[l][k].elem == -1){
 
                 //Verificações em linha acima
                 if (l > 0){
                     if (k > 0){
-                        if (list_field[l-1][k-1] >= 0) list_field[l-1][k-1] += 1;
+                        if (list_field[l-1][k-1].elem >= 0) list_field[l-1][k-1].elem += 1;
                     }
 
-                    if (list_field[l-1][k] >= 0) list_field[l-1][k] += 1;
+                    if (list_field[l-1][k].elem >= 0) list_field[l-1][k].elem += 1;
 
                     if (k < *n_columns-1){
-                        if (list_field[l-1][k+1] >= 0) list_field[l-1][k+1] += 1;
+                        if (list_field[l-1][k+1].elem >= 0) list_field[l-1][k+1].elem += 1;
                     }
                 }
 
                 //Verificações em linha abaixo
                 if (l < *n_lines-1){
                     if (k > 0){
-                        if (list_field[l+1][k-1] >= 0) list_field[l+1][k-1] += 1;
+                        if (list_field[l+1][k-1].elem >= 0) list_field[l+1][k-1].elem += 1;
                     }
 
-                    if (list_field[l+1][k] >= 0) list_field[l+1][k] += 1;
+                    if (list_field[l+1][k].elem >= 0) list_field[l+1][k].elem += 1;
 
                     if (k < *n_columns-1){
-                        if (list_field[l+1][k+1] >= 0) list_field[l+1][k+1] += 1;
+                        if (list_field[l+1][k+1].elem >= 0) list_field[l+1][k+1].elem += 1;
                     }
                 }
 
                 //Verificações na linha atual
-                if (k >= 0 && list_field[l][k-1] >= 0) list_field[l][k-1] += 1;
-                if (k >= *n_columns-1 && list_field[l][k+1] >= 0) list_field[l][k+1] += 1;
+                if (k > 0 && list_field[l][k-1].elem >= 0) list_field[l][k-1].elem += 1;
+                if (k < (*n_columns - 1) && list_field[l][k+1].elem >= 0) list_field[l][k+1].elem += 1;
 
             }
         }
 
     }
+
+    fclose(File_board);
 
     return list_field;
 }
@@ -175,21 +192,14 @@ int** get_board_with_hits(FILE *File_board, int *n_columns, int *n_lines){
  *  Retorno:
  *      void
 */
-void print_board_with_hints(){
-
-    char *board_name = readline(stdin);
-    FILE *File_board = fopen(board_name, "r");
-    free(board_name);
-
-    int n_lines, n_columns;
-    int **list_field = get_board_with_hits(File_board, &n_columns, &n_lines);
+void print_board_with_hints(Field **list_field, int n_columns, int n_lines){
 
     //Imprimir na tela
     for (int l=0; l < n_lines; l++){
         for (int k=0; k < n_columns; k++){
-            if (list_field[l][k] == 0) printf(".");
-            else if (list_field[l][k] < 0) printf("*");
-            else printf("%d",list_field[l][k]);
+            if (list_field[l][k].elem == 0) printf(".");
+            else if (list_field[l][k].elem < 0) printf("*");
+            else printf("%d",list_field[l][k].elem);
         }
         printf("\n");
     }
@@ -199,7 +209,44 @@ void print_board_with_hints(){
         free(list_field[l]);
     }
     free(list_field);
-    fclose(File_board);
+
+    return;
+}
+
+void user_control(Field **list_field, int n_columns, int n_lines){
+
+    int x, y;
+    scanf(" %d %d", &x, &y);
+
+    //Caso as coordenadas indiquem um campo com bomba
+    if (list_field[x][y].elem == -1){
+
+        print_board_with_hints(list_field, n_columns, n_lines); 
+
+        return;
+    }
+
+    //Caso as coordenads indiquem um campo com uma dica
+    if (list_field[x][y].elem > 0){
+        list_field[x][y].hidden = 0;
+    }
+    
+    //Imprime tabuleiro com os campos desconhecidos marcados com 'X'
+    for (int l=0; l < n_lines; l++){
+        for (int k=0; k < n_columns; k++){
+            if (list_field[l][k].hidden) printf("X");
+            else if (list_field[l][k].elem == 0) printf(".");
+            else if (list_field[l][k].elem < 0) printf("*");
+            else printf("%d",list_field[l][k].elem);
+        }
+        printf("\n");
+    }
+
+    //Liberando memória
+    for (int l=0; l < n_lines; l++){
+        free(list_field[l]);
+    }
+    free(list_field);
 
     return;
 }
@@ -210,6 +257,8 @@ int main(int argc, char *argv[]){
     scanf(" %d", &op);
     getc(stdin);
 
+    int n_lines, n_columns;
+    Field **list_field;
     switch(op){
 
         case 1:
@@ -217,7 +266,15 @@ int main(int argc, char *argv[]){
             break;
 
         case 2:
-            print_board_with_hints();
+            list_field = get_board_with_hits(&n_columns, &n_lines); 
+            print_board_with_hints(list_field, n_columns, n_lines);
+
+            break;
+
+        case 3:
+            list_field = get_board_with_hits(&n_columns, &n_lines); 
+            user_control(list_field, n_columns, n_lines);
+
             break;
 
         default:
