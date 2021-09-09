@@ -50,7 +50,8 @@ void print_board(){
     char *line;
     do{
         line = readline(File_board);
-        printf("%s\n",line);
+        printf("%s",line);
+        if (!feof(File_board)) printf("\n");
         free(line);
     }while (!feof(File_board));
 
@@ -213,6 +214,64 @@ void print_board_with_hints(Field **list_field, int n_columns, int n_lines){
     return;
 }
 
+Field** walk_through_board(Field **list_field, int x, int y, int n_columns, int n_lines){
+    
+    //caso o campo encontrado seja uma bomba ou tenha uma dica, retornar
+    if (list_field[x][y].elem != 0){
+
+        if (list_field[x][y].elem > 0)
+            list_field[x][y].hidden = 0;
+
+        return list_field;
+    }
+
+    //assim que se passa pelo campo, o mesmo deixa de ser oculto
+    list_field[x][y].hidden = 0;
+
+    //caminhando para cima
+    if (x > 0){
+
+        //mesma coluna
+        if (list_field[x-1][y].hidden != 0)
+            list_field = walk_through_board(list_field, x-1, y, n_columns, n_lines);
+        
+        //coluna anterior
+        if (y > 0 && list_field[x-1][y-1].hidden != 0)
+            list_field = walk_through_board(list_field, x-1, y-1, n_columns, n_lines);
+
+        //coluna seguinte
+        if (y < (n_columns-1) && list_field[x-1][y+1].hidden != 0)
+            list_field = walk_through_board(list_field, x-1, y+1, n_columns, n_lines);
+
+    }
+
+    //caminhando para baixo
+    if (x < (n_lines-1) ){
+
+        //mesma coluna
+        if (list_field[x+1][y].hidden != 0)
+            list_field = walk_through_board(list_field, x+1, y, n_columns, n_lines);
+        
+        //coluna anterior
+        if (y > 0 && list_field[x+1][y-1].hidden != 0)
+            list_field = walk_through_board(list_field, x+1, y-1, n_columns, n_lines);
+
+        //coluna seguinte
+        if (y < (n_columns-1) && list_field[x+1][y+1].hidden != 0)
+            list_field = walk_through_board(list_field, x+1, y+1, n_columns, n_lines);
+
+    }
+
+    //mantendo-se na mesma linha
+    if (y > 0 && list_field[x][y-1].hidden != 0)
+        list_field = walk_through_board(list_field, x, y-1, n_columns, n_lines);
+    if (y < (n_columns-1) && list_field[x][y+1].hidden != 0)
+        list_field = walk_through_board(list_field, x, y+1, n_columns, n_lines);
+
+    return list_field;
+
+}
+
 void user_control(Field **list_field, int n_columns, int n_lines){
 
     int x, y;
@@ -229,6 +288,9 @@ void user_control(Field **list_field, int n_columns, int n_lines){
     //Caso as coordenads indiquem um campo com uma dica
     if (list_field[x][y].elem > 0){
         list_field[x][y].hidden = 0;
+    }
+    else{
+        list_field = walk_through_board(list_field, x, y, n_columns, n_lines);
     }
     
     //Imprime tabuleiro com os campos desconhecidos marcados com 'X'
