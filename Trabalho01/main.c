@@ -13,8 +13,6 @@ typedef struct field{
 
 /* Função de leitura de linha
  *  Lê da entrada recebida (stream) uma string até encontrar algum terminador de linha (ou de arquivo) e a retorna
- *      Parâmetros: FILE*
- *      Retorno: char*
 */
 #define READLINE_BUFFER 4096
 char *readline(FILE *stream) {
@@ -39,8 +37,6 @@ char *readline(FILE *stream) {
 /* OPÇÃO 1: Função de leitura. 
  *  Recebe da entrada padrão o nome do arquivo que contém o tabuleiro a ser lido.
  *  Lê o arquivo e imprime o tabuleiro na saída padrão linha a linha.
- *      Parâmetros: nenhum;
- *      Retorno: void;
 */
 void print_board(){
     
@@ -61,15 +57,15 @@ void print_board(){
     return;
 }
 
-/* Lê de campo de File_board e retorna uma matriz int** contendo os dados do campo
- * -1 = bomba
- *  0 = campo vazio
- *  Parâmetros:
- *      *File_board: arquivo a ser lido
- *      *n_columns: número de colunas da tabela
- *      *n_lines: número de linhas da tabela
- *  Retorno:
- *      int **list_field;
+/* Pega nome do arquivo a ser lido da stdin e o abre em modo leitura
+ * Retorna uma matriz Field** contendo os dados do campo
+ * Valores de cada campo do tipo Field:
+ *  elem:
+ *   -1  = bomba
+ *    0 >= campo vazio
+ *  hidden:
+ *    1 = oculto (padrão)
+ *    0 = não oculto
 */
 Field** get_board_with_hits(int *n_columns, int *n_lines){
 
@@ -144,7 +140,7 @@ Field** get_board_with_hits(int *n_columns, int *n_lines){
         for (int k = 0; k < *n_columns; k++){
 
             /*Quando uma bomba é encontrada, verifica-se sua vizinhança e incrementa o que for necessário
-              O campo apenas é incrementado quando for >= 0, isto é, quando não for uma bomba */
+              O campo apenas é incrementado quando for >= 0, isto é, quando estiver vazio*/
             if (list_field[l][k].elem == -1){
 
                 //Verificações em linha acima
@@ -187,11 +183,7 @@ Field** get_board_with_hits(int *n_columns, int *n_lines){
     return list_field;
 }
 
-/* Imprime o campo minado com as posições das bombas e as dicas
- *  Parâmetros:
- *      [Nada]
- *  Retorno:
- *      void
+/* Imprime o campo minado com as posições das bombas e as dicas 
 */
 void print_board_with_hints(Field **list_field, int n_columns, int n_lines){
 
@@ -214,6 +206,11 @@ void print_board_with_hints(Field **list_field, int n_columns, int n_lines){
     return;
 }
 
+/* Função recursiva que caminha pelo tabuleiro a fim de retirar o status de oculto dos campos vazios por onde passa.
+ * Quando encontra um campo vazio contendo uma dica, o revela e retorna, sem continar seu caminho.
+ * Ao passar por um campo vazio com 0 dicas, checa todos os 8 campos adjacentes a ele.
+ * A função é chamada recursivamente até acabarem todos os caminhos possíveis.
+*/
 Field** walk_through_board(Field **list_field, int x, int y, int n_columns, int n_lines){
     
     //caso o campo encontrado seja uma bomba ou tenha uma dica, retornar
@@ -272,8 +269,11 @@ Field** walk_through_board(Field **list_field, int x, int y, int n_columns, int 
 
 }
 
+/* OPÇÃO 3: 
+ *  Lê duas entradas de coordenadas do stdin e realiza as análises necessárias:
+ *      Revela apenas o campo em questão, caso seja 
+*/
 void user_control(Field **list_field, int n_columns, int n_lines){
-
     int x, y;
     scanf(" %d %d", &x, &y);
 
@@ -285,13 +285,8 @@ void user_control(Field **list_field, int n_columns, int n_lines){
         return;
     }
 
-    //Caso as coordenads indiquem um campo com uma dica
-    if (list_field[x][y].elem > 0){
-        list_field[x][y].hidden = 0;
-    }
-    else{
-        list_field = walk_through_board(list_field, x, y, n_columns, n_lines);
-    }
+    //Caso as coordenads indiquem um campo vazio (com ou sem dica)
+    list_field = walk_through_board(list_field, x, y, n_columns, n_lines);
     
     //Imprime tabuleiro com os campos desconhecidos marcados com 'X'
     for (int l=0; l < n_lines; l++){
@@ -336,7 +331,6 @@ int main(int argc, char *argv[]){
         case 3:
             list_field = get_board_with_hits(&n_columns, &n_lines); 
             user_control(list_field, n_columns, n_lines);
-
             break;
 
         default:
