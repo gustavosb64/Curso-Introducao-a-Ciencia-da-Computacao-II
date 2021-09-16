@@ -73,7 +73,6 @@ Field** get_board_with_hits(int *n_columns, int *n_lines){
     FILE *File_board = fopen(board_name, "r");
     free(board_name);
 
-    //int **list_field = (int **) malloc(1 * sizeof(int *));
     Field **list_field = (Field **) malloc(1 * sizeof(Field *));
     list_field[0] = (Field *) malloc(1 * sizeof(Field));
 
@@ -207,7 +206,7 @@ void print_board_with_hints(Field **list_field, int n_columns, int n_lines){
 }
 
 /* Função recursiva que caminha pelo tabuleiro a fim de retirar o status de oculto dos campos vazios por onde passa.
- * Quando encontra um campo vazio contendo uma dica, o revela e retorna, sem continar seu caminho.
+ * Quando encontra um campo vazio contendo uma dica, o revela e retorna, sem continuar seu caminho.
  * Ao passar por um campo vazio com 0 dicas, checa todos os 8 campos adjacentes a ele.
  * A função é chamada recursivamente até acabarem todos os caminhos possíveis.
 */
@@ -271,7 +270,9 @@ Field** walk_through_board(Field **list_field, int x, int y, int n_columns, int 
 
 /* OPÇÃO 3: 
  *  Lê duas entradas de coordenadas do stdin e realiza as análises necessárias:
- *      Revela apenas o campo em questão, caso seja 
+ *      Revela apenas o campo em questão, caso seja uma dica
+ *      Revela toda cadeia de campos vazios adjacentes, caso seja um campo vazio sem dicas
+ *      Revela todo o tabuleiro com todas as bombas e dicas, caso seja uma bomba
 */
 void user_control(Field **list_field, int n_columns, int n_lines){
     int x, y;
