@@ -1,5 +1,5 @@
 all:
-	gcc -g -Wall -Wpedantic -lm -o main main.c func.c
+	gcc -Wall -o main main.c func.c -lm
 
 c:
 	gcc -g -lm -o main main.c func.c
