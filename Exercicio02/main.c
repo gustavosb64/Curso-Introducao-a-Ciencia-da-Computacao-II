@@ -13,24 +13,23 @@ int areEqual(int **matrix, int lin, int col, int n){
 
     int elem = matrix[lin][col];
 
-    for (int i = lin; i < lin+n; i++){
-        for (int j = col; j < col+n; j++){
+    for (int i = lin; i < lin+n; i++)
+        for (int j = col; j < col+n; j++)
             if (matrix[i][j] != elem) return False;
-        }
-    }
 
     return True;
 }
 
 void pre_order_print(int **matrix, int lin, int col, int n){
     
-//    printf("lin: %d col: %d n: %d\n",lin,col,n);
-    
+    //checa se os valores no quadrante são iguais
     if(areEqual(matrix, lin, col, n)){
         printf("%d ",matrix[lin][col]);
         return;
     }
 
+    //Caso não sejam iguais, imprime -1 e percorre seus subquadrantes recursivamente
+    
     printf("-1 ");
 
     pre_order_print(matrix, lin, col, (int)(n/2));
@@ -45,10 +44,7 @@ void pre_order_print(int **matrix, int lin, int col, int n){
 int main(int argc, char *argv[]){
 
     int n;
-    scanf(" %d ", &n);
-    getc(stdin); //como a matriz sempre é quadrada neste problema, não li o segundo valor
-
-//    printf("%d\n",n);
+    scanf(" %d %d", &n, &n); //como a matriz é quadrada, armazenei os valores em apenas uma variável
 
     int **matrix = (int **) malloc(n * sizeof(int*));
     for (int i=0; i<n; i++){
@@ -58,30 +54,7 @@ int main(int argc, char *argv[]){
         }
     }
 
-    /*
-    for (int i=0; i<n; i++){
-        for (int j=0; j<n; j++){
-            printf("%d ",matrix[i][j]);
-        }
-        printf("\n");
-    }
-    */
-
     pre_order_print(matrix, 0, 0, n);
-
-/*
-    printf("%d\n",areEqual(matrix, 0, 0, n));
-
-    printf("%d\n",areEqual(matrix, 0, 0, n/2));
-    printf("%d\n",areEqual(matrix, 0,(n/2), n/2));
-    printf("%d\n",areEqual(matrix, (n/2), 0, n/2));
-    printf("%d\n",areEqual(matrix, (n/2), (n/2), n/2));
-
-    printf("%d\n",areEqual(matrix, 0, 0, n/4));
-    printf("%d\n",areEqual(matrix, 0,(n/4), n/4));
-    printf("%d\n",areEqual(matrix, (n/4), 0, n/4));
-    printf("%d\n",areEqual(matrix, (n/4), (n/4), n/4));
-*/
 
     for(int i=0; i<n; i++){
         free(matrix[i]);
