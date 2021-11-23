@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include "lista_encadeada.h"
 
+#define BUFFER 4096
+
 int main(int argc, char *argv[]){
 
     int p, t0, tf, r;
@@ -18,6 +20,8 @@ int main(int argc, char *argv[]){
     List **M_ProcList = (List **) malloc(4 * sizeof(List**));
     for (int i=0; i < 4; i++)
         M_ProcList[i] = CreateList();
+
+    List *ProcList = CreateList();
 
     Process process; 
     do{
@@ -30,20 +34,47 @@ int main(int argc, char *argv[]){
         process.r = r;
 
         //Caso p já esteja na lista, busca o próximo ID válido
+        while (InList(ProcList, process) == 1)
+            process.p += 1;
+
+        AddOrderedByTime(ProcList, process);
+//        AddOrderedById(ProcList, process);
+
+        /*
         while (InList(M_ProcList[process.r - 1], process) == 1)
             process.p += 1;
 
 //        AddLastElem(M_ProcList[process.r - 1], process);
         AddOrderedElem(M_ProcList[process.r - 1], process);
+        */
 
     }while(!feof(stdin)); 
 
+    PrintList(ProcList);
+    printf("-----------------\n");
+
+    PercorrerLista(ProcList, M_ProcList);
+
+    /*
+    while(!IsEmptyList(ProcList) ||
+            !IsEmptyList(M_ProcList[0]) ||
+            !IsEmptyList(M_ProcList[1]) ||
+            !IsEmptyList(M_ProcList[2]) ||
+            !IsEmptyList(M_ProcList[4]) )
+    { 
+
+    }
+    */
+    
+    /*
     for(int i=0; i<4; i++)
         PrintList(M_ProcList[i]);
+    */
 
     //Liberando memória
+    FreeList(ProcList);
     for(int i=0; i<4; i++)
-        FreeList(M_ProcList[i]);
+    FreeList(M_ProcList[i]);
     free(M_ProcList);
 
     return 0;

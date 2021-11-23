@@ -64,6 +64,7 @@ int AddLastElem(List *list, Process e){
 }
 
 int AddFirstElem(List *list, Process e){
+
     Node *aux_node = (Node *) malloc(sizeof(Node));
     if (aux_node == NULL) return 1;
 
@@ -116,7 +117,30 @@ int AddMiddleElem(List *list, Process e, int index){
     return 0;
 }
 
-int AddOrderedElem(List *list, Process e){
+int AddOrderedByTime(List *list, Process e){
+
+    AddLastElem(list, e);
+
+    int counter = 0;
+    Node *node = list->first;
+    while (node->val.t0 < e.t0){
+        node = node->next;
+        counter++;
+    }
+
+    int check = 1;
+    if (node->next == NULL){
+        check = 0;
+        return check;
+    }
+    RemoveLastElem(list, &e);
+
+    AddMiddleElem(list, e, counter);
+
+    return check;
+}
+
+int AddOrderedById(List *list, Process e){
 
     AddLastElem(list, e);
 
@@ -137,6 +161,173 @@ int AddOrderedElem(List *list, Process e){
     AddMiddleElem(list, e, counter);
 
     return check;
+}
+
+int AddOrderedByPriority(List *list, Process e){
+
+    AddLastElem(list, e);
+
+    int counter = 0;
+    Node *node = list->first;
+    while (node->val.r < e.r){
+        node = node->next;
+        counter++;
+    }
+
+    int check = 1;
+    if (node->next == NULL){
+        check = 0;
+        return check;
+    }
+    RemoveLastElem(list, &e);
+
+    while(node->val.r == e.r){
+        if (node->val.p > e.p)
+            break;
+        counter++;
+    }
+    AddMiddleElem(list, e, counter);
+
+    return check;
+}
+
+/*
+void PercorrerLista(List *list){
+
+    Node *orig_node = list->first;
+    List *aux_list = CreateList();
+
+    int counter = 1;
+    int del_check = 0;
+    Node *aux_node;
+    Process aux_e;
+    int aux_idx;
+
+    while (orig_node != NULL && counter == orig_node->val.t0){
+        AddLastElem(aux_list, orig_node->val);
+        orig_node = orig_node->next;
+    }
+
+    Node *node = aux_list->first;
+
+    while(!IsEmptyList(aux_list)){
+//        printf("---%d\n",node->val.p);
+
+        if (counter >= node->val.t0) node->val.tf -= 1;
+        if (node->val.tf == 0){
+            printf("%d %d\n", node->val.p, counter); 
+            del_check = 1;
+        }
+
+        aux_node = node;
+        if (node->next != NULL){
+            aux_node = node->next;
+        }
+        else
+            aux_node = list->first;
+
+        if (del_check){ 
+            SearchRemoveElem(aux_list, &node->val, &aux_e);
+            del_check = 0;
+        }
+        counter++;
+
+        node = aux_node;
+
+        while (orig_node != NULL && counter == orig_node->val.t0){
+            AddOrderedByPriority(aux_list, orig_node->val);
+            orig_node = orig_node->next;
+        }
+
+    }
+
+    FreeList(aux_list);
+
+    return;
+}
+*/
+
+void PercorrerLista(List *ProcList, List **M_ProcList){
+
+    Node *aux_node = ProcList->first;
+    Process aux_proc;
+
+    int counter = 1;
+    while(aux_node != NULL && aux_node->val.t0 == counter){
+        aux_node = aux_node->next;
+
+        RemoveFirstElem(ProcList, &aux_proc); 
+        AddLastElem(M_ProcList[aux_proc.r - 1], aux_proc);
+    }
+    Node *cur_pointer = M_ProcList[3]->first;
+    Node *cur_pointer2; 
+
+    Process aux_remove;
+
+    int cur_r = 3;
+    int cur_max_r;
+    int del_check = 0;
+    while(!IsEmptyList(ProcList) ||
+            !IsEmptyList(M_ProcList[0]) ||
+            !IsEmptyList(M_ProcList[1]) ||
+            !IsEmptyList(M_ProcList[2]) ||
+            !IsEmptyList(M_ProcList[3]) )
+    /*
+    while(!IsEmptyList(ProcList))
+    */
+    { 
+//        printf("%d\n",counter);
+
+        while (cur_pointer == NULL){
+
+            if ( (--cur_r) < 0) cur_r = 3;
+
+            cur_pointer = M_ProcList[cur_r]->first;
+        }
+
+        cur_pointer->val.tf -= 1;
+        if (cur_pointer->val.tf == 0){
+            printf("%d %d\n", cur_pointer->val.p, counter); 
+            del_check = 1;
+            cur_pointer2 = cur_pointer; 
+        }
+
+        counter++;
+
+        cur_max_r = cur_r;
+        while(aux_node != NULL && aux_node->val.t0 == counter){
+
+            if (cur_max_r < aux_node->val.r){
+                cur_max_r = aux_node->val.r;
+            }
+
+            aux_node = aux_node->next;
+
+            RemoveFirstElem(ProcList, &aux_proc); 
+            AddLastElem(M_ProcList[aux_proc.r - 1], aux_proc);
+        }
+
+        cur_pointer = cur_pointer->next;
+        /*
+        if (cur_max_r <= cur_r){
+        }
+        else{
+            cur_pointer = M_ProcList[cur_max_r - 1]->first;
+        }
+        */
+
+        if (del_check == 1){
+            SearchRemoveElem(M_ProcList[cur_r], &cur_pointer2->val, &aux_remove);
+            del_check = 0;
+        }
+        
+    }
+
+    for (int i=0; i<4; i++){
+        PrintList(M_ProcList[i]);
+    }
+
+    return;
 }
 
 int RemoveLastElem(List *list, Process *e){
@@ -195,20 +386,39 @@ int InList(List *list, Process e){
     return check;
 }
 
-/*
-Process* GetFirstElem(List *list){
+int GetFirstElem(List *list, Process *e){
 
     if(IsEmptyList(list)) return 1;
 
-    return list->first->val;
+    *e = list->first->val;
+    return 0;
+}
+
+Node* SearchElemList(List *list, Process e, int *error, int *index){
+
+    if(IsEmptyList(list)){
+        *error = 1;
+        return NULL;
+    }
+
+    Node *dest_node;
+    dest_node = list->first;
+    *index = 0;
+
+    while (dest_node != NULL){
+        if (dest_node->val.p == e.p) return dest_node;
+        dest_node = dest_node->next;
+        *index = *index+1;
+    }
+    
+    *error = 2;
+    return NULL;
 }
 
 int RemoveFirstElemR(List *list){
 
     if(IsEmptyList(list)) return 1;
 
-    int e = list->first->val;
-    
     Node *aux_node = list->first->next;
 
     if (aux_node != NULL)
@@ -219,7 +429,7 @@ int RemoveFirstElemR(List *list){
 
     list->n_elem--;
 
-    return e;
+    return 0;
 }
 
 int RemoveOddEven(List *list, Process *e){
@@ -231,25 +441,6 @@ int RemoveOddEven(List *list, Process *e){
 
     return 0;
 }
-
-int InList(List *list, Process e){
-
-    if(IsEmptyList(list)) return -1;
-
-    AddLastElem(list, e);
-
-    Node *node = list->first;
-    while (node->val != e)
-        node = node->next;
-
-    int check = 1;
-    if (node->next == NULL) check = 0;
-    
-    RemoveLastElem(list, &e);
-
-    return check;
-}
-
 
 int SearchRemoveElem(List *list, Process *e, Process *dest_e){
 
@@ -329,7 +520,6 @@ int RemoveMiddleElem(Node *node, Process *e){
 
     return 0;
 }
-*/
 
 int PrintList(List *list){
 

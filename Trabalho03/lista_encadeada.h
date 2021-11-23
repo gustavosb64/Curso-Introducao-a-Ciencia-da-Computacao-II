@@ -25,7 +25,11 @@ int AddFirstElem(List *list, Process e);
 
 int AddMiddleElem(List *list, Process e, int index);
 
-int AddOrderedElem(List *list, Process e);
+int AddOrderedByTime(List *list, Process e);
+
+int AddOrderedById(List *list, Process e);
+
+int AddOrderedByPriority(List *list, Process e);
 
 int RemoveLastElem(List *list, Process *e);
 
@@ -33,13 +37,15 @@ int RemoveFirstElem(List *list, Process *e);
 
 int InList(List *list, Process e);
 
-Process* GetFirstElem(List *list);
+int GetFirstElem(List *list, Process *e);
+
+Node* SearchElemList(List *list, Process e, int *error, int *index);
+
+void PercorrerLista(List *ProcList, List **M_ProcList);
 
 int RemoveFirstElemR(List *list);
 
 int RemoveOddEven(List *list, Process *e);
-
-int InList(List *list, Process e);
 
 int SearchRemoveElem(List *list, Process *e, Process *dest_e);
 
