@@ -93,7 +93,7 @@ int AddMiddleElem(List *list, Process e, int index){
         return 0;
     }
 
-    if (index == (list->n_elem - 1)){
+    if (index == (list->n_elem)){
         if (AddLastElem(list, e)) return 1;
         return 0;
     }
@@ -151,16 +151,12 @@ int AddOrderedById(List *list, Process e){
         counter++;
     }
 
-    int check = 1;
-    if (node->next == NULL){
-        check = 0;
-        return check;
-    }
+    if (node->next == NULL) return 0;
     RemoveLastElem(list, &e);
 
     AddMiddleElem(list, e, counter);
 
-    return check;
+    return 1;
 }
 
 int AddOrderedByPriority(List *list, Process e){
@@ -257,13 +253,14 @@ void PercorrerLista(List *ProcList, List **M_ProcList){
         aux_node = aux_node->next;
 
         RemoveFirstElem(ProcList, &aux_proc); 
-        AddLastElem(M_ProcList[aux_proc.r - 1], aux_proc);
+        AddOrderedById(M_ProcList[aux_proc.r - 1], aux_proc);
     }
     Node *cur_pointer = M_ProcList[3]->first;
     Node *cur_pointer2; 
 
     Process aux_remove;
 
+    int change_check = 0;
     int cur_r = 3;
     int cur_max_r = cur_r;
     int del_check = 0;
@@ -282,10 +279,15 @@ void PercorrerLista(List *ProcList, List **M_ProcList){
             cur_pointer = M_ProcList[cur_r]->first;
         }
 
+        if (change_check == 1 && cur_max_r > cur_pointer->val.r){
+            cur_pointer = M_ProcList[cur_max_r]->first;
+            cur_r = cur_max_r;
+            change_check = 0;
+        }
         /*
         printf("---max: %d cur: %d\n",cur_max_r, cur_r);
-        printf("counter: %d id: %d tf: %d cur_r: %d\n",counter, cur_pointer->val.p, cur_pointer->val.tf, cur_r+1);
         */
+//        printf("counter: %d id: %d tf: %d cur_r: %d\n",counter, cur_pointer->val.p, cur_pointer->val.tf, cur_r+1);
 
         cur_pointer->val.tf -= 1;
         if (cur_pointer->val.tf == 0){
@@ -304,6 +306,7 @@ void PercorrerLista(List *ProcList, List **M_ProcList){
 
         cur_max_r = cur_r;
         while(aux_node != NULL && aux_node->val.t0 == counter){
+            change_check = 1;
 
             if (cur_max_r < aux_node->val.r - 1){
                 cur_max_r = aux_node->val.r - 1;
@@ -312,7 +315,7 @@ void PercorrerLista(List *ProcList, List **M_ProcList){
             aux_node = aux_node->next;
 
             RemoveFirstElem(ProcList, &aux_proc); 
-            AddLastElem(M_ProcList[aux_proc.r - 1], aux_proc);
+            AddOrderedById(M_ProcList[aux_proc.r - 1], aux_proc);
         }
         
         cur_pointer = cur_pointer->next;
@@ -325,11 +328,11 @@ void PercorrerLista(List *ProcList, List **M_ProcList){
             cur_pointer = cur_pointer->next;
         }
         else{
-        */
         if (cur_max_r > cur_r){
             cur_pointer = M_ProcList[cur_max_r]->first;
             cur_r = cur_max_r;
         }
+        */
 
         if (del_check == 1){
             SearchRemoveElem(M_ProcList[cur_r], &cur_pointer2->val, &aux_remove);
