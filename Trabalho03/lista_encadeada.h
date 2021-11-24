@@ -17,7 +17,7 @@ typedef struct node Node;
 */
 typedef struct list List;
 
-/*
+/* 
  * Lê todos os processos passados pelo stdin e os armazena em ProcList
 */
 void ReadAllProcesses(List *ProcList);

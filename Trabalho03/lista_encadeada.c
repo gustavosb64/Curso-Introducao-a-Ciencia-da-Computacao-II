@@ -1,3 +1,10 @@
+/* 
+ * Título: SIMULADOR DE ESCALONADOR DE PROCESSOS
+ * Nome: Gustavo Siqueira Barbosa
+ * NºUSP: 10728122
+ * Código do curso: SCC0201
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "lista_encadeada.h"
@@ -100,8 +107,8 @@ void EscalonarProcessos(List *ProcList){
             !IsEmptyList(M_ProcList[3]) )
     { 
 
-        //Caso o ponteiro atual seja nulo, significa que a lista de 
-        //prioridade está vazia. Ir para prioridade mais baixa
+        //Caso o ponteiro atual seja nulo, significa que a lista de prioridade está vazia.
+        //Ir para prioridade mais baixa
         while (cur_pointer == NULL){
 
             if ( (--cur_r) < 0) cur_r = 3;
@@ -115,7 +122,8 @@ void EscalonarProcessos(List *ProcList){
             cur_r = cur_max_r;
         }
 
-        //Ao terminar de executar, del_check é marcado e o processo é deletado da lista posteriormente
+        //Quando um processo termina de executar (isto é, quando val.tf == 0),
+        //del_check é marcado e o processo é deletado da lista posteriormente
         cur_pointer->val.tf -= 1;
         if (cur_pointer->val.tf == 0){
             printf("%d %d\n", cur_pointer->val.p, counter); 
@@ -127,10 +135,7 @@ void EscalonarProcessos(List *ProcList){
 
         //Checa se há entradas com t0 iguais ao tempo atual
         cur_max_r = 0;
-        if (NewProcessess(ProcList, M_ProcList, &node_procList, counter, &cur_max_r))
-            change_check = 1;
-        else
-            change_check = 0;
+        change_check = NewProcessess(ProcList, M_ProcList, &node_procList, counter, &cur_max_r);
         
         cur_pointer = cur_pointer->next;
 

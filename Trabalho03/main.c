@@ -16,6 +16,7 @@ int main(int argc, char *argv[]){
     //Lê todos os processos do stdin e armazena em ProcList
     ReadAllProcesses(ProcList);
 
+    //Escalona os processos lidos e armazenados em ProcList
     EscalonarProcessos(ProcList);
 
     //Liberando memória
