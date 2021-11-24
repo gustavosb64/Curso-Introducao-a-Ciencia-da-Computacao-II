@@ -265,16 +265,13 @@ void PercorrerLista(List *ProcList, List **M_ProcList){
     Process aux_remove;
 
     int cur_r = 3;
-    int cur_max_r;
+    int cur_max_r = cur_r;
     int del_check = 0;
     while(!IsEmptyList(ProcList) ||
             !IsEmptyList(M_ProcList[0]) ||
             !IsEmptyList(M_ProcList[1]) ||
             !IsEmptyList(M_ProcList[2]) ||
             !IsEmptyList(M_ProcList[3]) )
-    /*
-    while(!IsEmptyList(ProcList))
-    */
     { 
 //        printf("%d\n",counter);
 
@@ -285,6 +282,11 @@ void PercorrerLista(List *ProcList, List **M_ProcList){
             cur_pointer = M_ProcList[cur_r]->first;
         }
 
+        /*
+        printf("---max: %d cur: %d\n",cur_max_r, cur_r);
+        printf("counter: %d id: %d tf: %d cur_r: %d\n",counter, cur_pointer->val.p, cur_pointer->val.tf, cur_r+1);
+        */
+
         cur_pointer->val.tf -= 1;
         if (cur_pointer->val.tf == 0){
             printf("%d %d\n", cur_pointer->val.p, counter); 
@@ -292,13 +294,19 @@ void PercorrerLista(List *ProcList, List **M_ProcList){
             cur_pointer2 = cur_pointer; 
         }
 
+        /*
+        if (cur_pointer->val.p == 407){
+            printf("counter: %d tf: %d\n",counter, cur_pointer->val.tf);
+        }
+        */
+
         counter++;
 
         cur_max_r = cur_r;
         while(aux_node != NULL && aux_node->val.t0 == counter){
 
-            if (cur_max_r < aux_node->val.r){
-                cur_max_r = aux_node->val.r;
+            if (cur_max_r < aux_node->val.r - 1){
+                cur_max_r = aux_node->val.r - 1;
             }
 
             aux_node = aux_node->next;
@@ -306,15 +314,22 @@ void PercorrerLista(List *ProcList, List **M_ProcList){
             RemoveFirstElem(ProcList, &aux_proc); 
             AddLastElem(M_ProcList[aux_proc.r - 1], aux_proc);
         }
-
+        
         cur_pointer = cur_pointer->next;
         /*
+        if (cur_pointer->val.p == 407){
+//            printf("cur_r: %d cur_max: %d\n",cur_r, cur_max_r);
+        }
+
         if (cur_max_r <= cur_r){
+            cur_pointer = cur_pointer->next;
         }
         else{
-            cur_pointer = M_ProcList[cur_max_r - 1]->first;
-        }
         */
+        if (cur_max_r > cur_r){
+            cur_pointer = M_ProcList[cur_max_r]->first;
+            cur_r = cur_max_r;
+        }
 
         if (del_check == 1){
             SearchRemoveElem(M_ProcList[cur_r], &cur_pointer2->val, &aux_remove);
