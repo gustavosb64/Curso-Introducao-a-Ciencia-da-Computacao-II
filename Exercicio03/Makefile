@@ -1,6 +1,6 @@
 all:
 	python autotad.py lista_encadeada.c comment-off
-	gcc -Wall -g -o main main.c lista_encadeada.c
+	gcc -Wall -Wpedantic -g -o main main.c lista_encadeada.c
 
 c:
 	python autotad.py lista_encadeada.c comment-off
