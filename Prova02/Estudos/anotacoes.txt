@@ -1,0 +1,6 @@
+
+A função de eficiência do quicksort é ligeiramente menor que a do merge, por conta do uso de memória e todas as trocas do mergesort
+
+O mergesort gasta uma complexidade de memória O(n), ao passo que a do quicksort é O(1)
+
+O insertion sort é melhor que ambos para um vetor ordenado

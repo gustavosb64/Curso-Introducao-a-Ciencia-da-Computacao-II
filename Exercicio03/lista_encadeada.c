@@ -15,11 +15,6 @@ struct list{
     int n_elem;
 };
 
-struct arrayNode{
-    char key;
-    Node *node;
-};
-
 List* CreateList(){
     List *list = (List *) malloc(sizeof(List)); 
     if (list == NULL){
@@ -31,6 +26,8 @@ List* CreateList(){
     list->last = list->first; 
     list->n_elem = 0; 
 
+    /* A lista não se inicia vazia. Armazena 26 nós como separadores de cada uma 
+     * das 26 letras do alfabeto, sendo que cada nó possui val apontando para NULL*/
     for(int i=0; i<26; i++)
         AddLastElem(list, NULL);
 
@@ -39,6 +36,7 @@ List* CreateList(){
 
 Node** CreateArrayNode(List *list){
 
+    //O vetor de índices armazena ponteiros para cada uma das palavras de cada letra
     Node **array_letters = (Node **) malloc(26 * sizeof(Node*));
     Node *aux_node = list->first;
 
@@ -81,7 +79,7 @@ int AddLastElem(List *list, elem e){
 
 int UpdateArrayNode(List *list, Node **array_letters){
 
-    int counter = 0;
+    int counter = 0; //conta quantas seções do alfabeto diferentes foram utilizadas
     for (int i=0; i<26; i++){
 
         if (array_letters[i]->val == NULL){
@@ -119,6 +117,8 @@ int AddMiddleElemByRefNode(List *list, Node *ref_node, elem e){
 
     node->val = e;
 
+    //Caso ref_node->val == NULL, então a letra não foi preenchida ainda
+    //Desta forma, o novo elemento é colocado logo após ref_node
     if ((ref_node)->val == NULL){
 
         node->next = ref_node->next;
@@ -131,6 +131,8 @@ int AddMiddleElemByRefNode(List *list, Node *ref_node, elem e){
         return 0;
     }
 
+    //Caso o nó anterior ao ref_node não tenha val == NULL, é porque ainda
+    //não se alcançou a última posição da lista referente à letra em questão
     while (ref_node->prev->val != NULL)
         ref_node = ref_node->prev;
 
@@ -148,11 +150,15 @@ int IsArrayUpToDate(Node **array_letters){
 
     for (int i=1; i<26; i++){
 
+        //Se o array_letters[i] apontar para o marcador enquanto há elementos na letra,
+        //o vetor não está atualizado
         if (array_letters[i]->val == NULL){
             if (array_letters[i]->next != NULL && array_letters[i]->next->val != NULL)
                 return 0;
         }
         else{ 
+            //Se o array_letters[i] não apontar para o primeiro elemento da respectiva
+            //letra, o vetor não está atualizado
             if (array_letters[i]->prev->val != NULL)
                 return 0;
             
@@ -165,15 +171,16 @@ int IsArrayUpToDate(Node **array_letters){
 
 void SearchElemList(List *list, Node **array_letters, elem e){
 
+    //Caso list->n_elem <= 26, não há elementos além dos marcadores de seção
     if(list->n_elem <= 26 || !IsArrayUpToDate(array_letters)){
         printf("Vetor de indices nao atualizado.\n");
         return;
     }
 
-    int key = e[0]-97;
+    int key = e[0]-97; //refere-se ao índice do vetor referente à primeira letra de e
     Node *aux_node = array_letters[key];
 
-    int counter = 0;
+    int counter = 0; //conta quantas palavras foram analisadas até encontrar elemento e
     while(aux_node != NULL && aux_node->val != NULL && aux_node->val[0] == e[0]){
         
         if (!strcmp(aux_node->val, e)){

@@ -1,0 +1,26 @@
+
+COUNTING SORT 
+     
+    => Sem registros
+        1º) O(n+k): idealmente, n>=k, neste caso, isso passa a ser linear em n
+        2º) chaves: discretas
+        3º) não funciona com registros
+        4º) Memória auxiliar: O(k)
+     
+    => Com registros
+        PASSOS:
+            1º cópia -> n, auxiliar k
+            2º contagem -> k + n
+            3º posicionamento -> n + k
+     
+        1º) O(n+k): idealmente, n>=k, neste caso, isso passa a ser linear em n
+        2º) Memória auxiliar: O(n+k)
+        3º) Estável: preserva a ordem relativa dos elementos de entrada 
+        4º) chaves: discretas
+
+BUCKET SORT 
+
+    É uma boa opção para lista encadeada
+    
+    1º) O(n+k)
+    2º) Memória auxiliar: k + m*n (por usar ponteiros, etc)
