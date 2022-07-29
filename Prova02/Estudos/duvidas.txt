@@ -1,6 +1,0 @@
-
-Uma função é sempre O( ) de algo maior que o necessário? Por exemplo, 7 é O(n)?
-
-Para justificar que um polinômio é O(n^k), posso usar apenas c > que o coeficiente de n^k do polinômio?
-
-Como contar calloc, malloc, scanf...?
